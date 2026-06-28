@@ -4,6 +4,7 @@
   --adrs-text: #e6edf3;
   --adrs-muted: #8b949e;
   --adrs-accent: #4ea1ff;
+  --adrs-border: #253044;
 
   color-scheme: dark;
 }
@@ -55,19 +56,39 @@ body {
 
 .adrs-stage {
   flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   position: relative;
+  min-height: 0;
+  overflow: hidden;
 }
 
-.adrs-stage__placeholder {
-  text-align: center;
+.diorama-canvas {
+  position: absolute;
+  inset: 0;
+}
+
+.diorama-canvas canvas {
+  display: block;
+  height: 100%;
+  width: 100%;
+}
+
+.adrs-stage__panel {
+  position: absolute;
+  left: 1rem;
+  top: 1rem;
+  max-width: min(26rem, calc(100% - 2rem));
+  padding: 0.85rem 1rem;
+  background: color-mix(in srgb, var(--adrs-panel) 86%, transparent);
+  border: 1px solid var(--adrs-border);
+  border-radius: 8px;
+  box-shadow: 0 14px 40px rgb(0 0 0 / 0.3);
+  backdrop-filter: blur(10px);
 }
 
 .adrs-stage__line {
   margin: 0 0 0.25rem;
   font-size: 1.1rem;
+  font-weight: 700;
 }
 
 .adrs-stage__hint {

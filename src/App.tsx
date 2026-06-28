@@ -1,6 +1,5 @@
-// ADRS Demo 01 Web Prototype — application shell.
-// Phase 1 first slice: setup only. The diorama canvas and player movement
-// are added in the following commits (diorama display / movement).
+import { DioramaCanvas } from './renderer/DioramaCanvas'
+
 export function App() {
   return (
     <div className="adrs-app">
@@ -9,10 +8,13 @@ export function App() {
         <span className="adrs-titlebar__sub">AIDA Diorama RPG Studio</span>
       </header>
       <main className="adrs-stage">
-        <div className="adrs-stage__placeholder">
-          <p className="adrs-stage__line">Phase 1 — setup complete.</p>
-          <p className="adrs-stage__hint">ジオラマ表示は次のコミットで追加します。</p>
-        </div>
+        <DioramaCanvas />
+        <section className="adrs-stage__panel" aria-label="Phase status">
+          <p className="adrs-stage__line">Phase 1-2: Diorama Canvas</p>
+          <p className="adrs-stage__hint">
+            固定カメラと仮グリッドだけの表示土台です。
+          </p>
+        </section>
       </main>
     </div>
   )
