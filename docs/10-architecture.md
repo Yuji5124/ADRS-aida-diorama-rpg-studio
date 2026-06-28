@@ -95,6 +95,7 @@ Editor UI
 | `mode` / `scene` | 現在のモード/シーン（title / field / battle / clear / gameover 等） |
 
 - **New Game 初期化**: flags は空（=全 false）、inventory 空、currentMapId/playerPosition は Project の startMapId/startPosition。
+  - **開始時ジョブ選択**（`23-job-skill-spec.md`）の結果は、`actor_hero.jobId` と初期 `stats`/`skills` として **GameState の party に反映**される（以後 Demo 01 では固定）。
 - **参照者**: Event Runtime（条件評価・flag更新）、Battle Runtime（party参照・結果反映）、Renderer（位置/見た目の表示）。
 - **重要**: GameState は **実行時の状態**であり、**Project Data とは分離**する。GameState の変化が Project Data を書き換えてはならない。
 

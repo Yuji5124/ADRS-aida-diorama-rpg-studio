@@ -55,7 +55,7 @@
 {
   "gameTitle": "ADRS Demo 01",
   "startingParty": ["actor_hero"],
-  "startingJob": "job_swordsman",   // 開始時固定ジョブ（または選択の初期値）
+  "startingJob": "job_swordsman",   // 開始時ジョブ選択の「フォールバック / デバッグ用初期値」（→ 23-job-skill-spec.md §2）
   "items": [
     { "id": "item_potion", "name": "ポーション", "effect": { "hp": 15 } }
   ],
@@ -142,12 +142,15 @@
 {
   "id": "actor_hero",
   "name": "主人公",
-  "jobId": "job_swordsman",       // ドット剣士 or 光術士
+  "jobId": "job_swordsman",       // 開始時ジョブ選択で確定（ドット剣士 or 光術士）
   "level": 1,
-  "stats": { "hp": 30, "mp": 8, "atk": 7, "def": 5, "spd": 6 },
-  "skills": ["skill_power_strike", "skill_guard_break"]
+  "stats": { "hp": 36, "mp": 8, "atk": 8, "def": 5, "spd": 5 },  // 選択ジョブの初期ステータスを反映（例: ドット剣士）
+  "skills": ["skill_power_strike", "skill_guard_break"]          // 選択ジョブのスキル
 }
 ```
+
+> `jobId` は **New Game 後のジョブ選択**で確定（→ `23-job-skill-spec.md` §2）。`stats` / `skills` は選択ジョブの初期値を反映する。
+> 光術士を選んだ場合は `stats: { hp:30, mp:20, atk:5, def:3, spd:6 }` / `skills: [skill_light_bolt, skill_heal]`。
 
 ---
 
@@ -172,6 +175,10 @@
 ]
 ```
 
+> Demo 01 での扱い（→ `23-job-skill-spec.md`）: `learnableSkills` は **初期習得スキル一覧**、
+> `statGrowth` は **将来用**（Demo 01 ではレベルアップ成長を扱わない）。初期ステータスは
+> 剣士 `{hp:36,mp:8,atk:8,def:5,spd:5}` / 光術士 `{hp:30,mp:20,atk:5,def:3,spd:6}`。
+
 ---
 
 ## Skill — スキル（各ジョブ 2 個）
@@ -179,7 +186,7 @@
 ```jsonc
 [
   { "id": "skill_power_strike", "name": "パワーストライク", "type": "attack", "mpCost": 3, "power": 12, "target": "enemy_single" },
-  { "id": "skill_guard_break",  "name": "ガードブレイク",   "type": "attack", "mpCost": 4, "power": 8,  "target": "enemy_single" },
+  { "id": "skill_guard_break",  "name": "ガードブレイク",   "type": "attack", "mpCost": 4, "power": 9,  "target": "enemy_single" },
   { "id": "skill_light_bolt",   "name": "ライトボルト",     "type": "attack", "mpCost": 4, "power": 14, "target": "enemy_single" },
   { "id": "skill_heal",         "name": "ヒール",           "type": "heal",   "mpCost": 5, "power": 18, "target": "ally_single" }
 ]
@@ -197,19 +204,22 @@
   {
     "id": "enemy_slime",
     "name": "スライム",
-    "stats": { "hp": 18, "mp": 0, "atk": 5, "def": 2, "spd": 4 },
+    "stats": { "hp": 12, "mp": 0, "atk": 3, "def": 1, "spd": 4 },
     "exp": 5, "gold": 3,
     "skills": ["skill_power_strike"]
   },
   {
     "id": "enemy_boss",
     "name": "洞窟の主",
-    "stats": { "hp": 60, "mp": 10, "atk": 10, "def": 4, "spd": 5 },
+    "stats": { "hp": 56, "mp": 10, "atk": 5, "def": 4, "spd": 5 },
     "exp": 50, "gold": 30,
     "skills": ["skill_power_strike"]
   }
 ]
 ```
+
+> 敵ステータスは `23-job-skill-spec.md` §6 の **バランス検証で確定した仮値**。
+> 特に boss `atk` は旧値 10 だと敵通常攻撃（`atk*2-def`）が両ジョブを数ターンで全滅させるため **5 に調整**した。
 
 > **`Enemy.skills` は Demo 01 では「予約フィールド」扱い**。Battle Runtime は Demo 01 では
 > **敵の通常攻撃のみ**を実行し、`skills` は参照しない（敵スキルは後続デモ）。詳細は `22-battle-spec.md` §9。
@@ -274,7 +284,7 @@
   "inventory": [                   // addItem の反映先
     { "itemId": "item_potion", "amount": 0 }
   ],
-  "party": ["actor_hero"],         // 現在のパーティ
+  "party": ["actor_hero"],         // 現在のパーティ（HP/MP は victory 後に全回復 / 22-battle-spec.md §11）
   "currentMapId": "map_town",      // 現在のマップ
   "playerPosition": { "x": 5, "y": 8 }  // 主人公の現在位置
 }
