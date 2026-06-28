@@ -62,6 +62,7 @@
 ### 🎯 フェーズ1 の最初のスライス（最初の一歩 / Codex #002 推奨）
 
 > **最初は「歩ける村」だけを作る。** Event Runtime / Battle Runtime / Job 選択 UI / AI / full Editor UI には広げない。
+> 📄 詳細計画は [`50-phase1-first-slice-plan.md`](50-phase1-first-slice-plan.md)（技術: React/TS/Vite/Three.js/Zustand、Tauri 後回し。実装着手は別途 GO 待ち）。
 
 | やること |
 |---|
