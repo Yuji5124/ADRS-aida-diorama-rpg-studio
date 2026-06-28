@@ -286,9 +286,14 @@
   ],
   "party": ["actor_hero"],         // 現在のパーティ（HP/MP は victory 後に全回復 / 22-battle-spec.md §11）
   "currentMapId": "map_town",      // 現在のマップ
-  "playerPosition": { "x": 5, "y": 8 }  // 主人公の現在位置
+  "playerPosition": { "x": 5, "y": 8 },  // 主人公の現在位置
+  "scene": "field"                 // 現在のシーン/モード: title | jobSelect | field | battle | clear | gameover
 }
 ```
+
+> `scene`（= mode）は遷移管理に使う（`10-architecture.md` §4）。タイトル → ジョブ選択 → フィールド →
+> 戦闘 → クリア / ゲームオーバーの遷移先を表す。フェーズ1 の地形移動だけなら `field` 固定で足りるが、
+> フェーズ2（戦闘・クリア・ゲームオーバー遷移）の前提として GameState に含める。
 
 ### flag の初期値ルール
 
