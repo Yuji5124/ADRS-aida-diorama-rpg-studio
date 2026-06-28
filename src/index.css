@@ -91,8 +91,30 @@ body {
   font-weight: 700;
 }
 
-.adrs-stage__hint {
-  margin: 0;
+.adrs-stage__facts {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.65rem 0 0;
   color: var(--adrs-muted);
   font-size: 0.9rem;
+}
+
+.adrs-stage__facts div {
+  display: grid;
+  grid-template-columns: 7.5rem minmax(0, 1fr);
+  gap: 0.75rem;
+}
+
+.adrs-stage__facts dt,
+.adrs-stage__facts dd {
+  margin: 0;
+}
+
+.adrs-stage__facts dt {
+  color: var(--adrs-muted);
+}
+
+.adrs-stage__facts dd {
+  color: var(--adrs-text);
+  font-variant-numeric: tabular-nums;
 }

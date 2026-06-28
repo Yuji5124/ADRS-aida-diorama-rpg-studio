@@ -1,14 +1,21 @@
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 
+import type { MapData } from '../types/project'
+import { buildDioramaScene } from './buildDioramaScene'
 import { createDioramaCamera, updateDioramaCamera } from './camera'
+import { getMapCenter, TILE_SIZE } from './coordinates'
 
 type DisposableObject = THREE.Object3D & {
   geometry?: THREE.BufferGeometry
   material?: THREE.Material | THREE.Material[]
 }
 
-export function DioramaCanvas() {
+type DioramaCanvasProps = {
+  map: MapData
+}
+
+export function DioramaCanvas({ map }: DioramaCanvasProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
@@ -26,9 +33,17 @@ export function DioramaCanvas() {
     renderer.outputColorSpace = THREE.SRGBColorSpace
     container.appendChild(renderer.domElement)
 
+    const mapCenter = getMapCenter(map.width, map.height)
+    const cameraView = {
+      viewWidth: map.width * TILE_SIZE,
+      viewDepth: map.height * TILE_SIZE,
+      padding: 3,
+      target: new THREE.Vector3(mapCenter.x, mapCenter.y, mapCenter.z),
+    }
     const camera = createDioramaCamera(
       Math.max(1, container.clientWidth),
       Math.max(1, container.clientHeight),
+      cameraView,
     )
 
     const ambientLight = new THREE.AmbientLight(0xe8f0ff, 0.45)
@@ -36,18 +51,12 @@ export function DioramaCanvas() {
     keyLight.position.set(6, 10, 4)
     scene.add(ambientLight, keyLight)
 
-    const ground = new THREE.Mesh(
-      new THREE.PlaneGeometry(12, 12),
-      new THREE.MeshStandardMaterial({
-        color: 0x2c5a45,
-        metalness: 0,
-        roughness: 0.88,
-      }),
-    )
-    ground.rotation.x = -Math.PI / 2
-    scene.add(ground)
+    const townTiles = buildDioramaScene(map)
+    scene.add(townTiles)
 
-    const grid = new THREE.GridHelper(12, 12, 0x96b9ff, 0x344860)
+    const gridSize = Math.max(map.width, map.height) * TILE_SIZE
+    const gridDivisions = Math.max(map.width, map.height)
+    const grid = new THREE.GridHelper(gridSize, gridDivisions, 0x96b9ff, 0x344860)
     grid.position.y = 0.02
     scene.add(grid)
 
@@ -56,7 +65,7 @@ export function DioramaCanvas() {
       const height = Math.max(1, container.clientHeight)
 
       renderer.setSize(width, height, false)
-      updateDioramaCamera(camera, width, height)
+      updateDioramaCamera(camera, width, height, cameraView)
     }
 
     const resizeObserver = new ResizeObserver(resize)
@@ -90,7 +99,7 @@ export function DioramaCanvas() {
       renderer.dispose()
       renderer.domElement.remove()
     }
-  }, [])
+  }, [map])
 
   return <div className="diorama-canvas" ref={containerRef} />
 }
