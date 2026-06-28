@@ -211,6 +211,10 @@
 ]
 ```
 
+> **`Enemy.skills` は Demo 01 では「予約フィールド」扱い**。Battle Runtime は Demo 01 では
+> **敵の通常攻撃のみ**を実行し、`skills` は参照しない（敵スキルは後続デモ）。詳細は `22-battle-spec.md` §9。
+> `spd` も将来用に保持するが、Demo 01 の行動順には使わない（味方→敵の固定順 / `22-battle-spec.md` §6）。
+
 ---
 
 ## Troop — 敵編成

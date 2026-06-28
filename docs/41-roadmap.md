@@ -34,9 +34,10 @@
 | **T5.5** | **Codex 技術レビュー反映ゲート**（下記） | `docs/reviews/CODEX_REVIEW_001.md` ✅ / 仕様修正 ✅ |
 | T6 | ジオラマ表現方針 | `24-diorama-rendering.md` ✅ |
 | T7 | アーキテクチャ方針（責務分離・データ流れ。**技術は候補のまま確定しない**） | `10-architecture.md` ✅ |
+| T8 | 戦闘仕様（行動順・ダメージ式・MP・逃走・勝敗・戻り契約） | `22-battle-spec.md` ✅ |
 
-> 現時点で T1〜T7 の主要ドキュメントは作成済み。**フェーズ0はほぼ完了**。
-> 残りは詳細仕様（`22-battle-spec.md` / `23-job-skill-spec.md` / `30-ai-support-spec.md`）。技術の最終確定は実装着手の合意時に行う。
+> 現時点で T1〜T8 の主要ドキュメントは作成済み。**フェーズ0はほぼ完了**。
+> 残りは詳細仕様（`23-job-skill-spec.md` / `30-ai-support-spec.md`）。技術の最終確定は実装着手の合意時に行う。
 
 ### 🚧 T5.5 Event runtime contract 修正ゲート（フェーズ1へ進む前提条件）
 
