@@ -4,6 +4,9 @@
 > **実際に一周できる短編 RPG 台本** として具体化する。
 > 本書は `21-event-system-spec.md` の **6 コマンドのみ**（message / addItem / setFlag / transfer / startBattle / clearGame）で表現する。
 > ストーリーは軽く、**3〜5 分で一周** できることを最優先する。
+>
+> **更新（Codex レビュー反映）:** 通常敵シンボルの消滅を flag `enemy_slime_01_defeated` で表現（flag は計 3 個）。
+> 宝箱は `chest_closed`→`chest_opened` をページ別 appearance で切り替え。ポーションは戦闘中に使わない。
 
 ---
 
@@ -77,7 +80,7 @@
 | 5 | 宝箱を調べる | ポーション入手 + 開封フラグ | `ev_chest_potion` |
 | 6 | 洞窟入口へ移動 | 入口に接触 | `ev_warp_cave` |
 | 7 | 洞窟へワープ | map_cave へ遷移 | `ev_warp_cave` |
-| 8 | 通常敵に接触 | 戦闘（逃走可） | `ev_enemy_slime` |
+| 8 | 通常敵に接触 | 戦闘（逃走可）。勝利でシンボル消滅 | `ev_enemy_slime_01` |
 | 9 | ボスに接触 | ボス戦（逃走不可） | `ev_boss` |
 | 10 | ボス撃破 | クリア画面へ | `ev_boss` → `clearGame` |
 
@@ -89,7 +92,7 @@
 ## 4. イベント一覧
 
 > すべて `21-event-system-spec.md` の 6 コマンドのみで表現。
-> 条件分岐コマンド・変数は不使用。flag は **宝箱の開封済み管理** と **ボス撃破記録** のみ。
+> 条件分岐コマンド・変数は不使用。flag は 3 個（**宝箱の開封** / **通常敵の撃破** / **ボス撃破**）。
 
 ---
 
@@ -144,13 +147,15 @@
 | マップID | `map_town` |
 | 位置の目安 | 道の脇 (x:9, y:8) |
 | trigger | `action` |
-| appearance | `chest_closed`（開封後は `chest_open` 表示想定） |
+| appearance | デフォルト `chest_closed` / 開封後ページで `chest_opened` |
 | 使う flag | `chest_potion_opened` |
 
 ```jsonc
+"appearance": { "tile": "chest_closed", "visible": true },
 "pages": [
   {
     "conditions": [{ "flag": "chest_potion_opened", "value": false }],
+    "appearance": { "tile": "chest_closed", "visible": true },
     "commands": [
       { "type": "addItem", "itemId": "item_potion", "amount": 1 },
       { "type": "setFlag", "flag": "chest_potion_opened", "value": true },
@@ -159,6 +164,7 @@
   },
   {
     "conditions": [{ "flag": "chest_potion_opened", "value": true }],
+    "appearance": { "tile": "chest_opened", "visible": true },
     "commands": [
       { "type": "message", "text": "宝箱は空っぽだ。" }
     ]
@@ -188,24 +194,38 @@
 
 ---
 
-### ev_enemy_slime — 通常敵シンボル
+### ev_enemy_slime_01 — 通常敵シンボル（勝利で消滅）
 
 | 項目 | 値 |
 |---|---|
-| イベントID | `ev_enemy_slime` |
+| イベントID | `ev_enemy_slime_01` |
 | マップID | `map_cave` |
 | 位置の目安 | 一本道の中ほど (x:7, y:6) |
 | trigger | `touch` |
-| appearance | `symbol_slime` |
-| 使う flag | なし |
+| appearance | デフォルト `symbol_slime` / 撃破後ページで `visible:false` |
+| 使う flag | `enemy_slime_01_defeated` |
 
 ```jsonc
-"commands": [
-  { "type": "startBattle", "troopId": "troop_slime", "canEscape": true }
+"appearance": { "tile": "symbol_slime", "visible": true },
+"pages": [
+  {
+    "conditions": [{ "flag": "enemy_slime_01_defeated", "value": false }],
+    "appearance": { "tile": "symbol_slime", "visible": true },
+    "commands": [
+      { "type": "startBattle", "troopId": "troop_slime", "canEscape": true },
+      { "type": "setFlag", "flag": "enemy_slime_01_defeated", "value": true }
+    ]
+  },
+  {
+    "conditions": [{ "flag": "enemy_slime_01_defeated", "value": true }],
+    "appearance": { "visible": false },
+    "commands": []
+  }
 ]
 ```
 
-> 戦闘勝利後はイベントの続き（なし）に戻り、シンボルは消滅扱い（実装メモ）。
+> **消滅はデータ駆動**: 勝利（victory）時のみ後続 `setFlag` が走り、2 ページ目が採用されて `visible:false`＝消滅。
+> 逃走（escape）時は後続が実行されずシンボルが残る（再接触で再戦可能）。エンジンの暗黙処理にはしない。
 
 ---
 
@@ -221,17 +241,22 @@
 | 使う flag | `boss_defeated` |
 
 ```jsonc
-"commands": [
-  { "type": "message", "text": "洞窟の主が立ちはだかった！" },
-  { "type": "startBattle", "troopId": "troop_boss", "canEscape": false },
-  { "type": "setFlag", "flag": "boss_defeated", "value": true },
-  { "type": "message", "text": "洞窟の主を倒した…！ 村に平和が戻った。" },
-  { "type": "clearGame" }
-]
+"appearance": { "tile": "symbol_boss", "visible": true },
+"pages": [{
+  "conditions": [{ "flag": "boss_defeated", "value": false }],
+  "commands": [
+    { "type": "message", "text": "洞窟の主が立ちはだかった！" },
+    { "type": "startBattle", "troopId": "troop_boss", "canEscape": false },
+    { "type": "setFlag", "flag": "boss_defeated", "value": true },
+    { "type": "message", "text": "洞窟の主を倒した…！ 村に平和が戻った。" },
+    { "type": "clearGame" }
+  ]
+}]
 ```
 
-> `startBattle` の **後ろ** のコマンドは「勝利して戦闘から戻ったら実行」される前提
-> （敗北時の挙動は `22-battle-spec.md` で定義予定。Demo 01 では敗北＝ゲームオーバー想定）。
+> `startBattle` の **後ろ** のコマンドは **victory（勝利）時のみ実行**（→ `21-event-system-spec.md` 結果契約）。
+> `canEscape:false` なので escape は発生しない。defeat（敗北）＝ゲームオーバーへ遷移し後続は実行しない。
+> よって敗北時に `boss_defeated` や `clearGame` が誤って走ることはない。
 
 ---
 
@@ -241,12 +266,14 @@
 |---|---|---|
 | ev_npc_villager | — | — |
 | ev_npc_oldman | — | — |
-| ev_chest_potion | `chest_potion_opened` | 宝箱の二重取得防止 |
+| ev_chest_potion | `chest_potion_opened` | 宝箱の二重取得防止 + 見た目切り替え |
 | ev_warp_cave | — | — |
-| ev_enemy_slime | — | — |
+| ev_enemy_slime_01 | `enemy_slime_01_defeated` | 通常敵シンボルの消滅（勝利後） |
 | ev_boss | `boss_defeated` | クリア記録（実質的なゴール印） |
 
-> Demo 01 で使う flag は **2 個のみ**。変数・数値カウンタは使わない。
+> Demo 01 で使う flag は **3 個**（`chest_potion_opened` / `enemy_slime_01_defeated` / `boss_defeated`）。
+> 変数・数値カウンタは使わない。flag を 2→3 にしたのは、敵シンボル消滅をデータ駆動で表すための最小修正
+> （エンジンの暗黙処理を避け、Event.commands 統一を守るため）。初期値は未定義=false（→ `11-data-model.md` GameState）。
 
 ---
 
@@ -276,13 +303,21 @@
 | 戦闘 | 想定ターン数 | 狙い |
 |---|---|---|
 | スライム ×2 | 2〜3 ターン | 操作・コマンドに慣れる肩慣らし |
-| 洞窟の主 | 4〜6 ターン | ポーション or ヒールを使う緊張感 |
+| 洞窟の主 | 4〜6 ターン | 光術士はヒールでしのぐ緊張感 |
 
 **バランス指針**
 - 通常戦は **ノーダメージ気味でも勝てる** 軽さ
-- ボスは **ポーション1個 or ヒール1回で間に合う** 程度の削り合い
+- ボスは **光術士はヒール1回 / ドット剣士は事前のフィールド回復で間に合う** 程度の削り合い
 - ドット剣士＝通常攻撃で押す / 光術士＝ライトボルト＋ヒールで戦う、と役割が体感できる差をつける
 - 詳細な数値確定は `22-battle-spec.md` / `23-job-skill-spec.md` で行う
+
+### 戦闘コマンドとポーションの扱い（Codex I4 反映）
+
+> **Demo 01 ではアイテムを戦闘中に使用しない。**
+> 戦闘コマンドは `attack` / `skill` / `escape` の 3 種に固定（「どうぐ」は追加しない）。
+> `item_potion` は **宝箱イベントと所持品（inventory）更新の動作確認用** アイテムであり、
+> 回復が必要な場面は光術士の `skill_heal`、またはフィールド（戦闘外）での使用で賄う想定。
+> 戦闘中の「どうぐ」コマンドは後続デモで扱う。
 
 ---
 

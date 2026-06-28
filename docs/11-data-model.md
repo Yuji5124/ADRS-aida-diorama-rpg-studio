@@ -29,6 +29,7 @@
 | Troop | 戦闘の敵編成 | 数個 |
 | Battle | 戦闘の実行時状態（保存対象ではない） | 実行時 |
 | Item | アイテム | 数個 |
+| GameState | ランタイム状態（flags / inventory / 現在地） | 実行時 |
 
 ---
 
@@ -88,9 +89,12 @@
     "light": { "type": "directional", "intensity": 1.0, "angle": 60 },
     "shadow": true                // 簡易影
   },
-  "events": ["ev_npc_01", "ev_chest_01", "ev_warp_cave", "ev_enemy_slime"]
+  "events": ["ev_npc_villager", "ev_npc_oldman", "ev_chest_potion", "ev_warp_cave"]
 }
 ```
+
+> イベント ID は `40-demo01-scenario.md` の Demo 01 実データに一致させる。
+> `map_cave` 側は `ev_enemy_slime_01` / `ev_boss` を持つ。
 
 ### 最小タイル種別（Demo 01）
 `grass`(草) / `road`(道) / `water`(水) / `wall`(壁) / `tree`(木) / `house`(家) / `cave_floor`(洞窟床) / `rock`(岩)
@@ -103,14 +107,15 @@
 
 ```jsonc
 {
-  "id": "ev_npc_01",
+  "id": "ev_npc_villager",
   "mapId": "map_town",
-  "position": { "x": 7, "y": 4 },
+  "position": { "x": 7, "y": 6 },
   "trigger": "action",            // action(調べる) | touch(接触) | auto
-  "appearance": { "tile": "npc_villager" },
+  "appearance": { "tile": "npc_villager", "visible": true },  // Event 直下=デフォルト見た目
   "pages": [
     {
       "conditions": [],           // Demo 01 はフラグ条件のみ（空=常時）
+      "appearance": { "tile": "npc_villager", "visible": true }, // 任意。ページ側があれば優先
       "commands": [
         { "type": "message", "text": "村へようこそ！" }
       ]
@@ -118,6 +123,16 @@
   ]
 }
 ```
+
+### appearance の優先ルール（Demo 01）
+
+- `Event.appearance` … デフォルトの見た目（必須）
+- `EventPage.appearance` … **任意**。指定があればそのページ採用時にこちらを優先（未指定なら Event 直下を継承）
+- `appearance.visible` … `false` のとき **非表示・当たり判定なし・trigger 発火なし**
+- 有効なページが 1 つも無いときも **非表示・当たり判定なし・trigger 発火なし** とみなす
+
+> これにより「宝箱 `chest_closed`→`chest_opened`」「敵シンボル勝利後に `visible:false` で消滅」を
+> **新コマンドを増やさず** データ駆動で表現できる（→ `21-event-system-spec.md`）。
 
 ---
 
@@ -234,6 +249,51 @@
 }
 ```
 
+> Demo 01 では `item_potion` は **宝箱イベントと所持品更新の動作確認用**。
+> 戦闘中の「どうぐ」コマンドは Demo 01 では扱わない（→ `40-demo01-scenario.md` §5）。
+
+---
+
+## GameState — ランタイム状態（保存対象は別途）
+
+> プレイ中に変化する状態を持つ実行時オブジェクト。`flags` / `inventory` の保存先がこれにあたる。
+> 定義データ（Map / Actor など）とは分離する。Demo 01 ではセーブ機構は作らないが、
+> **状態の置き場所は仕様として明示** しておく（イベントエンジンが参照する契約）。
+
+```jsonc
+{
+  "flags": {                       // 真偽値フラグのストア
+    "chest_potion_opened": false,
+    "enemy_slime_01_defeated": false,
+    "boss_defeated": false
+  },
+  "inventory": [                   // addItem の反映先
+    { "itemId": "item_potion", "amount": 0 }
+  ],
+  "party": ["actor_hero"],         // 現在のパーティ
+  "currentMapId": "map_town",      // 現在のマップ
+  "playerPosition": { "x": 5, "y": 8 }  // 主人公の現在位置
+}
+```
+
+### flag の初期値ルール
+
+- **未定義の flag は `false` として扱う**（`initialFlags` を毎回書かなくてよい）
+- 明示初期化したい場合のみ `flags` に列挙する
+- Demo 01 で使う flag は **3 個**:
+  - `chest_potion_opened` … 宝箱の二重取得防止
+  - `enemy_slime_01_defeated` … 通常敵シンボルの消滅（勝利後 `visible:false`）
+  - `boss_defeated` … クリア記録
+
+> flag が 2→3 個に増えるのは **スコープ拡大ではなく**、敵シンボル消滅をエンジンの暗黙処理にせず
+> Event.commands 統一方針の内側（pages + flag）で表現するための **最小修正**。
+
+### New Game 初期化
+
+- `flags` は空（=すべて false）
+- `inventory` は空（ポーションは宝箱で入手）
+- `currentMapId` / `playerPosition` は Project の `startMapId` / `startPosition` で初期化
+
 ---
 
 ## 参照関係まとめ
@@ -244,6 +304,11 @@ Project ──> System
 Actor ──> Job ──> Skill[]
 Actor ──> Skill[]
 System ──> Item[]
+
+Event.commands ──(setFlag)──> GameState.flags
+               ──(addItem)──> GameState.inventory
+               ──(transfer)─> GameState.currentMapId / playerPosition
+Event.pages ──(conditions)── 参照 ── GameState.flags
 ```
 
 ---

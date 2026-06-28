@@ -30,11 +30,26 @@
 | T2 | 未決定事項への回答・決定 | 決定ログ |
 | T3 | データモデル確定 | `11-data-model.md` ✅ |
 | T4 | イベントコマンド最小セット確定 | `21-event-system-spec.md` ✅ |
-| T5 | ジオラマ表現方針 + デモ用ミニシナリオ台本 | `24-diorama-rendering.md`, `40-demo01-scenario.md` |
-| T6 | 技術選定の方針合意（**ここで初めて技術を決める**） | `10-architecture.md` |
+| T5 | デモ用ミニシナリオ台本 | `40-demo01-scenario.md` ✅ |
+| **T5.5** | **Codex 技術レビュー反映ゲート**（下記） | `docs/reviews/CODEX_REVIEW_001.md` ✅ / 仕様修正 ✅ |
+| T6 | ジオラマ表現方針 | `24-diorama-rendering.md` |
+| T7 | 技術選定の方針合意（**ここで初めて技術を決める**） | `10-architecture.md` |
 
-> 現時点で T1・T3・T4 の主要ドキュメントは作成済み。
-> 次は T2（未決定事項の決定）と T5（台本）が中心。
+> 現時点で T1〜T5.5 の主要ドキュメントは作成済み。次は T6（ジオラマ表現）と T7（技術方針 / `10-architecture.md`）。
+
+### 🚧 T5.5 Event runtime contract 修正ゲート（フェーズ1へ進む前提条件）
+
+> Codex レビュー（`docs/reviews/CODEX_REVIEW_001.md`）の Blocking を、フェーズ 2 着手前に潰すためのゲート。
+> **このゲートを通過するまでフェーズ 1 / 2 の実装に入らない。**
+
+- [x] GameState（flags / inventory / currentMapId / playerPosition）を `11` に定義、未定義 flag=false を明記
+- [x] `startBattle` の victory / escape / defeat 結果契約を `21` に明記
+- [x] 通常敵シンボル消滅を flag `enemy_slime_01_defeated` + ページ `visible:false` で表現（flag 計 3 個）
+- [x] EventPage.appearance（ページ別見た目・visible 切り替え）を `11` / `21` に定義
+- [x] Event の通行・当たり判定（trigger 別標準ルール）を `21` に定義
+- [x] 宝箱の開封後 appearance（`chest_opened`）を `40` に反映
+- [x] ポーションは戦闘中に使わない方針を `40` に明記（戦闘コマンドは attack/skill/escape）
+- [x] サンプル event ID を `11`↔`40` で整合
 
 ---
 
@@ -118,6 +133,8 @@
 |---|---|---|
 | ジオラマ描画に時間を吸われる | RPG が遊べない箱になる | 表現はライト1灯+影で固定。霧/DOF は禁止 |
 | イベントを個別実装してしまう | 工数爆発 | commands 統一を厳守（`21` 参照） |
+| 敵消滅・戦闘結果をエンジン暗黙処理にする | Event.commands 統一が崩れる | flag + ページ visible / startBattle 結果契約で表現（T5.5） |
+| ランタイム状態の置き場が未定義 | flag/inventory が宙に浮く | GameState を `11` に定義（T5.5） |
 | ジョブ×スキルの組み合わせ爆発 | バランス調整で溶ける | ジョブ2 / スキル各2 / 敵2 を超えない |
 | DB 編集 GUI に着手 | Demo 1 本分の工数 | Demo 01 は JSON 手書き / 固定データ |
 | AI を多機能化 | 制御不能・遅延 | 1 機能・承認制を厳守 |
@@ -129,4 +146,5 @@
 - 各ターンの冒頭で「今どのフェーズ・どの MS か」を確認する
 - 新要望が出たら、まず `01-demo01-scope.md` の「やらないこと」に入れられないか検討する
 - フェーズ 0 が完了するまで実装に入らない
-- この 5 ファイル作成後、次は **Codex による技術レビュー** を挟む想定
+- **T5.5 ゲート（Codex 指摘の Blocking）を通過してから** フェーズ 1 / 2 に進む
+- 残りフェーズ 0 タスク: `24-diorama-rendering.md`（T6）→ `10-architecture.md`（T7）
