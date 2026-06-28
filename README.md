@@ -68,12 +68,18 @@ Demo 01 は「RPGツクールMV 級の機能網羅」ではなく、
 |---|---|
 | [docs/00-overview.md](docs/00-overview.md) | ADRS の概要・名称ポリシー・用語・ドキュメント構成 |
 | [docs/01-demo01-scope.md](docs/01-demo01-scope.md) | Demo 01 のスコープ（やること／やらないこと） |
-| [docs/11-data-model.md](docs/11-data-model.md) | 主要データ構造（Project / Map / Event / Actor / Job / Skill / Enemy / Battle / System ほか） |
+| [docs/10-architecture.md](docs/10-architecture.md) | アーキテクチャ方針（責務分離・データ流れ。技術は候補） |
+| [docs/11-data-model.md](docs/11-data-model.md) | 主要データ構造（Project / Map / Event / Actor / Job / Skill / Enemy / Battle / System / GameState ほか） |
 | [docs/21-event-system-spec.md](docs/21-event-system-spec.md) | イベント／コマンド仕様（ADRS の心臓部・6 コマンド統一方式） |
+| [docs/22-battle-spec.md](docs/22-battle-spec.md) | 戦闘仕様（行動順・ダメージ式・MP・逃走・勝敗・戻り契約） |
+| [docs/23-job-skill-spec.md](docs/23-job-skill-spec.md) | ジョブ・スキル仕様（開始時ジョブ選択・数値バランス検証） |
+| [docs/24-diorama-rendering.md](docs/24-diorama-rendering.md) | ジオラマ表現方針（固定見下ろし・ライト1灯・擬似影） |
+| [docs/30-ai-support-spec.md](docs/30-ai-support-spec.md) | AI サポート仕様（NPC セリフ提案・承認制・Editor 専用） |
 | [docs/40-demo01-scenario.md](docs/40-demo01-scenario.md) | Demo 01 ミニシナリオ台本（一周できる短編 RPG） |
 | [docs/41-roadmap.md](docs/41-roadmap.md) | 実装前〜デモ完成までの進行計画（5 フェーズ / 20〜30 ターン） |
+| [docs/reviews/](docs/reviews) | レビュー記録（Codex 技術レビュー / 内部整合レビュー） |
 
-今後追加予定: `10-architecture.md` / `22-battle-spec.md` / `23-job-skill-spec.md` / `24-diorama-rendering.md` / `30-ai-support-spec.md` / `40-demo01-scenario.md` 以外の補助仕様。
+> フェーズ0（実装前・仕様確定）の仕様一式は揃っています。
 
 ---
 
@@ -88,8 +94,8 @@ Demo 01 は「RPGツクールMV 級の機能網羅」ではなく、
 
 ## 次のステップ
 
-1. ✅ 仕様書一式の作成（00 / 01 / 11 / 21 / 40 / 41）
-2. ⏭️ **Codex による技術レビュー** — [prompts/CODEX_TECH_REVIEW_001.md](prompts/CODEX_TECH_REVIEW_001.md) を Codex に渡す
-3. 🔜 レビュー結果を `docs/reviews/CODEX_REVIEW_001.md` にまとめる
-4. 🔜 指摘を受けて仕様修正
-5. 🔜 残り仕様書（10 / 22 / 23 / 24 / 30）へ進む
+1. ✅ 仕様書一式の作成（00 / 01 / 10 / 11 / 21 / 22 / 23 / 24 / 30 / 40 / 41）
+2. ✅ Codex 技術レビュー → `docs/reviews/CODEX_REVIEW_001.md` にまとめ、指摘を反映
+3. ✅ 内部整合レビュー → `docs/reviews/INTERNAL_CONSISTENCY_REVIEW_001.md`
+4. ⏭️ 実装フェーズへ入る前の最終レビュー（Codex 2 回目を想定）
+5. 🔜 実装フェーズ1（マップ表示・移動・カメラ）着手

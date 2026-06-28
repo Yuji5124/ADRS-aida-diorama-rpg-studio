@@ -58,7 +58,7 @@ Demo 01 は「RPGツクールMV 級の機能網羅」ではなく、
 ### イベント（統一コマンド方式）
 - 会話 / 宝箱 / ワープ / 戦闘開始 を **すべて Event の `commands` で表現**
 - 最小コマンド: `message` / `addItem` / `setFlag` / `transfer` / `startBattle` / `clearGame`
-- 宝箱の開封済み管理のための **フラグ（flag）**
+- **フラグ（flag）** 3 個: 宝箱開封 `chest_potion_opened` / 通常敵撃破 `enemy_slime_01_defeated` / クリア記録 `boss_defeated`（未定義 flag は false）
 
 ### 戦闘
 - ターン制コマンドバトル
@@ -71,7 +71,7 @@ Demo 01 は「RPGツクールMV 級の機能網羅」ではなく、
 ### ジョブ・スキル
 - ジョブ 2 種（ドット剣士 / 光術士）
 - 各 2 スキル
-- 開始時に固定ジョブ、またはサンプル上は固定でよい
+- **New Game 後にジョブを 1 つ選ぶ**（開始時ジョブ選択）。選択後は固定。**ゲーム中のジョブチェンジはなし**（→ `23-job-skill-spec.md`）
 
 ### AI サポート
 - NPC セリフ・クエスト文の提案（1 機能のみ）
