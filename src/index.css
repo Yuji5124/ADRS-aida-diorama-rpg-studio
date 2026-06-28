@@ -1,0 +1,77 @@
+:root {
+  --adrs-bg: #0e1116;
+  --adrs-panel: #161b22;
+  --adrs-text: #e6edf3;
+  --adrs-muted: #8b949e;
+  --adrs-accent: #4ea1ff;
+
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  background: var(--adrs-bg);
+  color: var(--adrs-text);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  overflow: hidden;
+}
+
+.adrs-app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.adrs-titlebar {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  background: var(--adrs-panel);
+  border-bottom: 1px solid #21262d;
+}
+
+.adrs-titlebar__brand {
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--adrs-accent);
+}
+
+.adrs-titlebar__sub {
+  font-size: 0.85rem;
+  color: var(--adrs-muted);
+}
+
+.adrs-stage {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.adrs-stage__placeholder {
+  text-align: center;
+}
+
+.adrs-stage__line {
+  margin: 0 0 0.25rem;
+  font-size: 1.1rem;
+}
+
+.adrs-stage__hint {
+  margin: 0;
+  color: var(--adrs-muted);
+  font-size: 0.9rem;
+}
